@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flipcard Studio — Interactive 3D Card & Flashcard Learning Hub</title>
+  <meta name="description" content="A state-of-the-art interactive 3D Flip Card learning platform featuring spaced repetition, custom deck creation, audio feedback, and rich themes.">
+  <meta name="author" content="Ritesh Verma">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="neon">
+  <!-- Background Glow & Aurora FX -->
+  <div class="bg-mesh" aria-hidden="true"></div>
+  <div class="bg-particles" aria-hidden="true"></div>
+
+  <!-- Header / Navigation -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo-group">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="14" height="18" rx="2" stroke="currentColor"/>
+            <path d="M8 7h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8" stroke="currentColor" stroke-dasharray="2 2"/>
+            <path d="m9 11 3 3-3 3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="logo-title">Flipcard<span>Studio</span></h1>
+          <p class="logo-subtitle">Interactive 3D Knowledge Hub</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-center">
+      <div class="deck-selector-wrapper">
+        <label for="deckSelect" class="sr-only">Select Deck</label>
+        <span class="selector-icon">📚</span>
+        <select id="deckSelect" class="deck-select" title="Choose a study deck">
+          <!-- Populated by JS -->
+        </select>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="theme-picker" title="Change Theme Style">
+        <label for="themeSelect" class="sr-only">Theme</label>
+        <select id="themeSelect" class="theme-select">
+          <option value="neon">⚡ Cyber Neon</option>
+          <option value="aurora">🌌 Aurora Borealis</option>
+          <option value="obsidian">🖤 Obsidian Luxe</option>
+          <option value="sunset">🌅 Sunset Gradient</option>
+          <option value="emerald">💎 Emerald Matrix</option>
+        </select>
+      </div>
+
+      <button id="soundToggleBtn" class="icon-btn" title="Toggle Sound FX (Web Audio)" aria-label="Toggle Sound Effects">
+        <svg id="soundIconOn" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        </svg>
+        <svg id="soundIconOff" class="hidden" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <line x1="23" y1="9" x2="17" y2="15"></line>
+          <line x1="17" y1="9" x2="23" y2="15"></line>
+        </svg>
+      </button>
+
+      <button id="addCardModalBtn" class="btn btn-primary" title="Create a new card">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>New Card</span>
+      </button>
+
+      <button id="keyboardHelpBtn" class="icon-btn" title="Keyboard Shortcuts" aria-label="Shortcuts">
+        ⌨️
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="app-main">
+    <!-- Top Stats & Progress Bar -->
+    <section class="stats-ribbon" aria-label="Study Progress">
+      <div class="stat-item">
+        <span class="stat-label">Progress</span>
+        <div class="progress-bar-container">
+          <div id="deckProgressBar" class="progress-bar-fill" style="width: 0%"></div>
+        </div>
+        <span id="progressPercent" class="stat-value">0%</span>
+      </div>
+
+      <div class="stat-divider"></div>
+
+      <div class="stat-item">
+        <span class="stat-icon">🎯</span>
+        <span class="stat-label">Card</span>
+        <span id="cardCounter" class="stat-value">1 / 10</span>
+      </div>
+
+      <div class="stat-divider"></div>
+
+      <div class="stat-item">
+        <span class="stat-icon">🔥</span>
+        <span class="stat-label">Streak</span>
+        <span id="streakCounter" class="stat-value">0</span>
+      </div>
+
+      <div class="stat-divider"></div>
+
+      <div class="stat-item">
+        <span class="stat-icon">🏆</span>
+        <span class="stat-label">Mastered</span>
+        <span id="masteredCount" class="stat-value">0</span>
+      </div>
+
+      <div class="view-mode-toggle">
+        <button id="studyModeBtn" class="tab-btn active" data-view="study">Flip Mode</button>
+        <button id="gridModeBtn" class="tab-btn" data-view="grid">Deck Gallery</button>
+      </div>
+    </section>
+
+    <!-- STUDY VIEW: Interactive 3D Card Stage -->
+    <section id="studyView" class="study-view active">
+      <!-- Deck Metadata Badge Bar -->
+      <div class="card-meta-bar">
+        <span id="cardCategoryTag" class="tag tag-category">Category</span>
+        <span id="cardDifficultyTag" class="tag tag-difficulty">Medium</span>
+        <span id="cardStatusBadge" class="tag tag-status">Unreviewed</span>
+      </div>
+
+      <!-- 3D Perspective Card Stage -->
+      <div class="card-stage" id="cardStage">
+        <div class="flip-card" id="flipCard" role="button" tabindex="0" aria-label="Flashcard. Click or press Space to flip." aria-pressed="false">
+          <!-- FRONT FACE -->
+          <div class="card-face card-front">
+            <div class="card-face-header">
+              <span class="face-badge front-badge">QUESTION / PROMPT</span>
+              <span class="hint-flip-pill">Click to Reveal ↺</span>
+            </div>
+            
+            <div class="card-face-content">
+              <h2 id="cardQuestion" class="card-title">Card Question Prompt</h2>
+              <div id="cardCodeBlockFront" class="code-container hidden">
+                <pre><code id="cardCodeFront"></code></pre>
+              </div>
+            </div>
+
+            <div class="card-face-footer">
+              <span class="deck-name-hint" id="currentDeckLabel">Full Stack Master</span>
+              <span class="flip-shortcut-badge">Press [Space] to flip</span>
+            </div>
+          </div>
+
+          <!-- BACK FACE -->
+          <div class="card-face card-back">
+            <div class="card-face-header">
+              <span class="face-badge back-badge">ANSWER / SOLUTION</span>
+              <span class="hint-flip-pill">Click to Hide ↺</span>
+            </div>
+
+            <div class="card-face-content">
+              <div id="cardAnswer" class="card-answer-text">Card Answer Description</div>
+              <div id="cardCodeBlockBack" class="code-container hidden">
+                <pre><code id="cardCodeBack"></code></pre>
+              </div>
+              <div id="cardKeyPoints" class="key-points-box hidden">
+                <h4>Key Takeaways:</h4>
+                <ul id="keyPointsList"></ul>
+              </div>
+            </div>
+
+            <div class="card-face-footer">
+              <span class="deck-name-hint">Self-Assessment</span>
+              <span class="flip-shortcut-badge">Rate retention below</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spaced Repetition Rating Toolbar (Appears or is active on flip) -->
+      <div class="rating-toolbar">
+        <span class="rating-prompt">How well did you know this?</span>
+        <div class="rating-buttons">
+          <button id="rateHardBtn" class="rate-btn rate-hard" title="Press [1] on keyboard">
+            <span class="rate-icon">🔄</span>
+            <span class="rate-text">Needs Review</span>
+            <kbd class="shortcut-kbd">1</kbd>
+          </button>
+          <button id="rateGoodBtn" class="rate-btn rate-good" title="Press [2] on keyboard">
+            <span class="rate-icon">👍</span>
+            <span class="rate-text">Understood</span>
+            <kbd class="shortcut-kbd">2</kbd>
+          </button>
+          <button id="rateEasyBtn" class="rate-btn rate-easy" title="Press [3] on keyboard">
+            <span class="rate-icon">⭐</span>
+            <span class="rate-text">Mastered</span>
+            <kbd class="shortcut-kbd">3</kbd>
+          </button>
+        </div>
+      </div>
+
+      <!-- Controls & Navigation Toolbar -->
+      <div class="card-controls">
+        <button id="prevCardBtn" class="btn btn-secondary control-btn" title="Previous Card (Left Arrow)">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span>Previous</span>
+        </button>
+
+        <button id="flipActionBtn" class="btn btn-primary control-btn flip-btn" title="Flip Card (Spacebar)">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+          </svg>
+          <span id="flipBtnText">Flip Card</span>
+        </button>
+
+        <button id="nextCardBtn" class="btn btn-secondary control-btn" title="Next Card (Right Arrow)">
+          <span>Next</span>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+
+        <div class="utility-actions">
+          <button id="shuffleDeckBtn" class="icon-btn-secondary" title="Shuffle Deck Cards" aria-label="Shuffle Cards">
+            🔀
+          </button>
+          <button id="resetDeckBtn" class="icon-btn-secondary" title="Reset Deck Progress" aria-label="Reset Progress">
+            ↺
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- GRID GALLERY VIEW: View All Cards in Deck -->
+    <section id="gridView" class="grid-view hidden">
+      <div class="grid-controls-bar">
+        <div class="grid-search-box">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="gridSearchInput" placeholder="Filter cards by topic, keyword, or concept...">
+        </div>
+        <div class="grid-filter-actions">
+          <button id="exportDeckBtn" class="btn btn-secondary" title="Export this deck to JSON file">
+            📥 Export JSON
+          </button>
+          <label class="btn btn-secondary file-upload-label" title="Import deck from JSON file">
+            📤 Import JSON
+            <input type="file" id="importDeckInput" accept=".json" class="hidden">
+          </label>
+        </div>
+      </div>
+
+      <div id="cardsGridContainer" class="cards-grid">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: Create / Edit Card -->
+  <div id="cardModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add New Study Card</h3>
+        <button id="closeModalBtn" class="modal-close-btn" aria-label="Close dialog">&times;</button>
+      </div>
+      <form id="cardForm" class="modal-form">
+        <div class="form-group">
+          <label for="newCardDeck">Target Deck</label>
+          <select id="newCardDeck" required></select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="newCardCategory">Category / Topic</label>
+            <input type="text" id="newCardCategory" placeholder="e.g. JavaScript, Algorithms, System Design" required>
+          </div>
+          <div class="form-group">
+            <label for="newCardDifficulty">Difficulty</label>
+            <select id="newCardDifficulty">
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate" selected>Intermediate</option>
+              <option value="Advanced">Advanced</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="newCardQuestion">Card Question (Front)</label>
+          <textarea id="newCardQuestion" rows="3" placeholder="Enter the prompt, question, or term to memorize..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="newCardAnswer">Card Answer & Explanation (Back)</label>
+          <textarea id="newCardAnswer" rows="4" placeholder="Enter the full explanation, definition, or answer..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="newCardCode">Optional Code Snippet</label>
+          <textarea id="newCardCode" rows="3" placeholder="const example = () => { ... }" class="code-font"></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelModalBtn" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Flipcard</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Keyboard Shortcuts Guide -->
+  <div id="shortcutsModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="shortcutsTitle">
+    <div class="modal-box shortcuts-box">
+      <div class="modal-header">
+        <h3 id="shortcutsTitle">⌨️ Keyboard Shortcuts</h3>
+        <button id="closeShortcutsBtn" class="modal-close-btn" aria-label="Close">&times;</button>
+      </div>
+      <div class="shortcuts-list">
+        <div class="shortcut-item">
+          <span>Flip Active Card</span>
+          <kbd>Space</kbd> or <kbd>Enter</kbd>
+        </div>
+        <div class="shortcut-item">
+          <span>Next Card</span>
+          <kbd>→</kbd> or <kbd>J</kbd>
+        </div>
+        <div class="shortcut-item">
+          <span>Previous Card</span>
+          <kbd>←</kbd> or <kbd>K</kbd>
+        </div>
+        <div class="shortcut-item">
+          <span>Rate: Needs Review</span>
+          <kbd>1</kbd>
+        </div>
+        <div class="shortcut-item">
+          <span>Rate: Understood</span>
+          <kbd>2</kbd>
+        </div>
+        <div class="shortcut-item">
+          <span>Rate: Mastered</span>
+          <kbd>3</kbd>
+        </div>
+        <div class="shortcut-item">
+          <span>Shuffle Current Deck</span>
+          <kbd>S</kbd>
+        </div>
+        <div class="shortcut-item">
+          <span>Close Any Modal</span>
+          <kbd>Esc</kbd>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <div class="footer-content">
+      <span>Flipcard Studio &bull; Created with 💜 by <a href="https://github.com/RiteshVerma1102" target="_blank" rel="noopener">Ritesh Verma</a></span>
+      <span class="footer-links">
+        <a href="https://github.com/RiteshVerma1102/Flipcard" target="_blank" rel="noopener">GitHub Repository</a>
+        &bull;
+        <a href="https://github.com/RiteshVerma1102/ajson-studio" target="_blank" rel="noopener">Reference Project</a>
+      </span>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

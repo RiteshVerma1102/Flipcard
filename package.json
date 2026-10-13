@@ -1,0 +1,31 @@
+{
+  "name": "flipcard-studio",
+  "version": "1.0.0",
+  "description": "Interactive 3D Flip Card & Flashcard Study Platform with Spaced Repetition, Custom Deck Builder, and Audio Feedback",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve -s . -l 3000",
+    "dev": "npx serve -s . -l 3000",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "flipcard",
+    "flashcards",
+    "study-tool",
+    "3d-card",
+    "css-3d-transforms",
+    "learning-platform",
+    "spaced-repetition",
+    "interactive"
+  ],
+  "author": "Ritesh Verma <vermaritesh24106867@gmail.com> (https://github.com/RiteshVerma1102)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RiteshVerma1102/Flipcard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/RiteshVerma1102/Flipcard/issues"
+  },
+  "homepage": "https://github.com/RiteshVerma1102/Flipcard#readme"
+}
